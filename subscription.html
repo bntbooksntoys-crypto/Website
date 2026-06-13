@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscription | B'N'T Books 'N' Toys</title>
+    <meta
+      name="description"
+      content="Choose a subscription plan for B'N'T Books 'N' Toys."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-theme="light">
+    <header class="site-header">
+      <div class="container nav">
+        <a href="index.html" class="brand">B'N'T Books 'N' Toys</a>
+        <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="index.html">Register</a>
+          <a href="login.html">Login</a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+            🌙
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="auth-page">
+      <section class="hero">
+        <div class="container hero-content">
+          <div class="auth-card">
+            <p class="eyebrow">Choose your plan</p>
+            <h1>Choose Your Subscription</h1>
+            <p class="lead">Select the subscription that fits your reading and play needs.</p>
+
+            <div class="plan-grid">
+              <article class="plan-card">
+                <p class="plan-badge">Bright start</p>
+                <h2>Premium Package</h2>
+                <p class="price">$9<span>/month</span></p>
+                <p class="plan-text">Perfect for casual readers and toy lovers.</p>
+                <ul>
+                  <li>Weekly book picks</li>
+                  <li>Early toy deals</li>
+                  <li>Email support</li>
+                </ul>
+                <a class="button secondary" href="payment.html">Choose Premium</a>
+              </article>
+
+              <article class="plan-card featured">
+                <p class="plan-badge featured-badge">Most popular</p>
+                <h2>Silver Package</h2>
+                <p class="price">$19<span>/month</span></p>
+                <p class="plan-text">Great for families who want more value every month.</p>
+                <ul>
+                  <li>Unlimited recommendations</li>
+                  <li>Exclusive toy bundles</li>
+                  <li>Priority support</li>
+                </ul>
+                <a class="button primary" href="payment.html">Choose Silver</a>
+              </article>
+
+              <article class="plan-card gold">
+                <p class="plan-badge">Elite fun</p>
+                <h2>Golden Package</h2>
+                <p class="price">$29<span>/month</span></p>
+                <p class="plan-text">The full experience with premium surprises and exclusive perks.</p>
+                <ul>
+                  <li>Priority shipping</li>
+                  <li>Monthly surprise boxes</li>
+                  <li>VIP member events</li>
+                </ul>
+                <a class="button primary" href="payment.html">Choose Golden</a>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p>© <span id="year"></span> B'N'T Books 'N' Toys</p>
+        <p>Built with HTML, CSS, and JavaScript.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register | B'N'T Books 'N' Toys</title>
+    <meta
+      name="description"
+      content="A polished one-page website built with HTML, CSS, and JavaScript."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-theme="light">
+    <header class="site-header">
+      <div class="container nav">
+        <a href="#" class="brand">B'<span class="brand-accent">N</span>'T Books '<span class="brand-accent">N</span>' Toys</a>
+        <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#features">Features</a>
+          <a href="#about">About</a>
+          <a href="#contact">Contact</a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+            🌙
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="auth-page">
+      <section class="hero">
+        <div class="container hero-content">
+          <div class="auth-card">
+            <p class="eyebrow">Create account</p>
+            <h1>Register for B'N'T Books 'N' Toys</h1>
+            <p class="lead">Join us to browse books and toys with ease.</p>
+
+            <form id="registerForm" class="auth-form">
+              <label class="field">
+                <span>Full Name</span>
+                <input type="text" name="name" placeholder="Your full name" required />
+              </label>
+
+              <label class="field">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="you@example.com" required />
+              </label>
+
+              <label class="field">
+                <span>Password</span>
+                <input type="password" name="password" placeholder="Create a password" required />
+              </label>
+
+              <label class="field">
+                <span>Confirm Password</span>
+                <input type="password" name="confirmPassword" placeholder="Re-enter password" required />
+              </label>
+
+              <button class="button primary" type="submit">Register</button>
+              <p id="registerMessage" class="form-message" aria-live="polite"></p>
+              <p class="auth-switch">Already have an account? <a href="login.html">Login here</a></p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p>© <span id="year"></span> B'<span class="brand-accent">N</span>'T Books '<span class="brand-accent">N</span>' Toys</p>
+        <p>Built with HTML, CSS, and JavaScript.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login | B'N'T Books 'N' Toys</title>
+    <meta
+      name="description"
+      content="A polished one-page website built with HTML, CSS, and JavaScript."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body data-theme="light">
+    <header class="site-header">
+      <div class="container nav">
+        <a href="index.html" class="brand">B'N'T Books 'N' Toys</a>
+        <button class="nav-toggle" aria-label="Toggle navigation">☰</button>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="index.html">Register</a>
+          <button id="themeToggle" class="theme-toggle" type="button" aria-label="Toggle theme">
+            🌙
+          </button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="auth-page">
+      <section class="hero">
+        <div class="container hero-content">
+          <div class="auth-card">
+            <p class="eyebrow">Welcome back</p>
+            <h1>Sign in to B'N'T Books 'N' Toys</h1>
+            <p class="lead">Access your account and continue exploring.</p>
+
+            <form id="loginForm" class="auth-form">
+              <label class="field">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="you@example.com" required />
+              </label>
+
+              <label class="field">
+                <span>Password</span>
+                <input type="password" name="password" placeholder="Enter your password" required />
+              </label>
+
+              <button class="button primary" type="submit">Login</button>
+              <p id="loginMessage" class="form-message" aria-live="polite"></p>
+              <p class="auth-switch">Don’t have an account? <a href="index.html">Register here</a></p>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <p>© <span id="year"></span> B'N'T Books 'N' Toys</p>
+        <p>Built with HTML, CSS, and JavaScript.</p>
+      </div>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
