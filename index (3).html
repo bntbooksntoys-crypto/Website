@@ -1,0 +1,2020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Book 'N' Toys – Rent Books & Toys for Kids</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ff6b35" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Book'N'Toys" />
+  <meta name="description" content="Rent books and toys for kids. Affordable weekly plans delivered to your door." />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+
+  <!-- EmailJS -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>emailjs.init('PXgwFLvzbEAM6Em8R');</script>
+
+  <!-- Firebase Compat (reliable global load) -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWmdqrEw988eEm2DhQ22HuI_zrgv1TxI8",
+      authDomain: "bookntoyz-12344.firebaseapp.com",
+      projectId: "bookntoyz-12344",
+      storageBucket: "bookntoyz-12344.firebasestorage.app",
+      messagingSenderId: "214718663088",
+      appId: "1:214718663088:web:70b448c244521ac3a86e75",
+      measurementId: "G-DX3RY2MF2S"
+    };
+    firebase.initializeApp(firebaseConfig);
+    window.db            = firebase.firestore();
+    window.firebaseReady = true;
+    console.log('✅ Firebase connected');
+  </script>
+  <!-- PWA Install Banner -->
+  <style>
+    #pwa-banner {
+      display:none; position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
+      background:#1a1a2e; color:#fff; padding:14px 20px; border-radius:16px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.3); z-index:4000;
+      flex-direction:row; align-items:center; gap:14px;
+      font-size:0.85rem; white-space:nowrap; animation:popIn 0.4s ease;
+    }
+    #pwa-banner.show { display:flex; }
+    #pwa-install-btn {
+      background:var(--primary); color:#fff; border:none; padding:8px 16px;
+      border-radius:20px; font-weight:800; cursor:pointer; font-size:0.82rem;
+      white-space:nowrap;
+    }
+    #pwa-dismiss { background:none; border:none; color:#aaa; cursor:pointer; font-size:1rem; }
+  </style>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --primary: #ff6b35;
+      --secondary: #ffd166;
+      --accent: #06d6a0;
+      --dark: #1a1a2e;
+      --text: #333;
+      --light-bg: #fff9f5;
+    }
+    body { font-family: 'Segoe UI', sans-serif; color: var(--text); background: #fff; overflow-x: hidden; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; width: 100%; background: rgba(255,255,255,0.97);
+      backdrop-filter: blur(10px); z-index: 1000; padding: 12px 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+    }
+    .nav-logo { font-size: 1.4rem; font-weight: 800; color: var(--primary); text-decoration: none; }
+    .nav-logo span { color: var(--dark); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--dark); font-weight: 500; font-size: 0.95rem; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .cart-btn {
+      background: var(--primary); color: #fff; border: none; padding: 9px 18px;
+      border-radius: 25px; font-weight: 700; cursor: pointer; font-size: 0.9rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cart-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,107,53,0.4); }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh; padding: 120px 5% 60px;
+      background: linear-gradient(135deg, #fff9f5 0%, #fff3e8 50%, #ffe8d6 100%);
+      display: flex; align-items: center; position: relative; overflow: hidden;
+    }
+    #hero::before {
+      content: '🧸📚🎮🎨🚂🦕🎯🧩';
+      position: absolute; top: 10%; right: 5%; font-size: 4rem;
+      opacity: 0.08; letter-spacing: 20px; line-height: 1.8;
+      transform: rotate(15deg); pointer-events: none;
+    }
+    .hero-content { max-width: 650px; }
+    .hero-badge {
+      display: inline-block; background: var(--secondary); color: var(--dark);
+      padding: 6px 16px; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
+      margin-bottom: 20px; letter-spacing: 0.5px;
+    }
+    .hero-content h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 900; color: var(--dark); line-height: 1.15; margin-bottom: 20px; }
+    .hero-content h1 span { color: var(--primary); }
+    .hero-content p { font-size: 1.1rem; color: #666; line-height: 1.7; margin-bottom: 36px; }
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 50px; }
+    .btn-primary {
+      background: var(--primary); color: #fff; padding: 14px 28px;
+      border-radius: 30px; font-weight: 700; text-decoration: none; font-size: 1rem;
+      transition: transform 0.2s, box-shadow 0.2s; display: inline-block;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(255,107,53,0.45); }
+    .btn-outline {
+      background: transparent; color: var(--dark); padding: 14px 28px;
+      border-radius: 30px; font-weight: 700; text-decoration: none; font-size: 1rem;
+      border: 2px solid var(--dark); transition: all 0.2s; display: inline-block;
+    }
+    .btn-outline:hover { background: var(--dark); color: #fff; }
+    .hero-stats { display: flex; gap: 36px; flex-wrap: wrap; }
+    .stat strong { display: block; font-size: 1.6rem; font-weight: 900; color: var(--primary); }
+    .stat span { font-size: 0.85rem; color: #888; }
+    .hero-badges { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+    .badge-pill {
+      background: #fff; border-radius: 25px; padding: 8px 16px;
+      font-size: 0.82rem; font-weight: 600; box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+      display: flex; align-items: center; gap: 6px;
+    }
+
+    /* ABOUT */
+    #about { padding: 80px 5%; background: #fff; }
+    .section-tag { color: var(--primary); font-size: 0.85rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; display: block; }
+    .section-title { font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 900; color: var(--dark); margin-bottom: 20px; }
+    .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; max-width: 1100px; margin: 0 auto; }
+    .about-text p { font-size: 1.05rem; color: #555; line-height: 1.8; margin-bottom: 16px; }
+    .about-features { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 28px; }
+    .feature-chip {
+      background: var(--light-bg); border-radius: 12px; padding: 14px 18px;
+      display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 0.9rem;
+    }
+    .about-visual {
+      background: linear-gradient(135deg, #fff9f5, #ffe8d6);
+      border-radius: 24px; padding: 50px; text-align: center;
+      font-size: 5rem; box-shadow: 0 10px 40px rgba(255,107,53,0.15);
+    }
+    .about-visual p { font-size: 1.1rem; font-weight: 700; color: var(--dark); margin-top: 16px; }
+    .about-visual span { color: #888; font-size: 0.85rem; font-weight: 400; }
+
+    /* PRODUCTS */
+    #products {
+      padding: 80px 5% 90px;
+      background: linear-gradient(180deg, #c9f0ff 0%, #e8f8ff 30%, #d4f5e9 60%, #fff9c4 100%);
+      position: relative; overflow: hidden;
+    }
+    #products::before {
+      content: '☁️'; position: absolute; top: 18px; left: 6%; font-size: 3.5rem; opacity: 0.55; pointer-events: none;
+    }
+    #products::after {
+      content: '☁️'; position: absolute; top: 30px; right: 8%; font-size: 2.5rem; opacity: 0.45; pointer-events: none;
+    }
+    .products-deco-left {
+      position: absolute; left: 2%; top: 50%; transform: translateY(-50%);
+      font-size: 3rem; opacity: 0.5; pointer-events: none; line-height: 2;
+    }
+    .products-deco-right {
+      position: absolute; right: 2%; top: 50%; transform: translateY(-50%);
+      font-size: 3rem; opacity: 0.5; pointer-events: none; line-height: 2;
+    }
+    .products-header { text-align: center; margin-bottom: 50px; position: relative; z-index: 1; }
+    .products-header h2 {
+      font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 900;
+      background: linear-gradient(90deg, #ff6b35, #f72585, #7209b7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      text-shadow: none; margin-bottom: 6px;
+    }
+    .products-header .fun-tag {
+      display: inline-block; background: linear-gradient(90deg, #f72585, #7209b7);
+      color: #fff; padding: 5px 20px; border-radius: 20px; font-size: 0.88rem;
+      font-weight: 700; margin-bottom: 10px; letter-spacing: 1px;
+    }
+    .plans-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 24px; max-width: 1050px; margin: 0 auto; position: relative; z-index: 1;
+    }
+    .plan-card {
+      border-radius: 24px; padding: 28px 22px 24px;
+      position: relative; transition: transform 0.28s cubic-bezier(.34,1.56,.64,1), box-shadow 0.28s;
+      overflow: hidden;
+    }
+    .plan-card:hover { transform: translateY(-10px) scale(1.02); }
+    /* Card colour themes */
+    .plan-card.premium {
+      background: linear-gradient(160deg, #fffde7 0%, #fff9c4 60%, #ffe082 100%);
+      box-shadow: 0 8px 32px rgba(255,193,7,0.28);
+      border: 2.5px solid #ffd54f;
+    }
+    .plan-card.silver {
+      background: linear-gradient(160deg, #e3f2fd 0%, #bbdefb 60%, #90caf9 100%);
+      box-shadow: 0 8px 32px rgba(33,150,243,0.22);
+      border: 2.5px solid #64b5f6;
+    }
+    .plan-card.golden {
+      background: linear-gradient(160deg, #fce4ec 0%, #f8bbd0 60%, #f48fb1 100%);
+      box-shadow: 0 8px 32px rgba(233,30,99,0.2);
+      border: 2.5px solid #f06292;
+    }
+    /* Decorative circles */
+    .plan-card::before {
+      content: ''; position: absolute; width: 120px; height: 120px; border-radius: 50%;
+      top: -40px; right: -30px; opacity: 0.18;
+    }
+    .plan-card.premium::before { background: #fbc02d; }
+    .plan-card.silver::before { background: #1565c0; }
+    .plan-card.golden::before { background: #c62828; }
+    .plan-top-badge {
+      display: inline-block; padding: 4px 14px; border-radius: 20px;
+      font-size: 0.75rem; font-weight: 800; margin-bottom: 12px; letter-spacing: 0.5px;
+    }
+    .premium .plan-top-badge { background: #fbc02d; color: #fff; }
+    .silver .plan-top-badge { background: #1976d2; color: #fff; }
+    .golden .plan-top-badge { background: #e91e63; color: #fff; }
+    .plan-icon-big { font-size: 3rem; margin-bottom: 8px; display: block; }
+    .plan-name {
+      font-size: 1.25rem; font-weight: 900; margin-bottom: 4px; letter-spacing: 0.5px;
+    }
+    .premium .plan-name { color: #e65100; }
+    .silver .plan-name { color: #0d47a1; }
+    .golden .plan-name { color: #880e4f; }
+    .plan-price {
+      font-size: 2.2rem; font-weight: 900; margin-bottom: 2px;
+    }
+    .premium .plan-price { color: #f57f17; }
+    .silver .plan-price { color: #1565c0; }
+    .golden .plan-price { color: #c2185b; }
+    .plan-free-tag {
+      display: inline-block; font-size: 0.72rem; font-weight: 800;
+      padding: 3px 12px; border-radius: 12px; margin-bottom: 14px; letter-spacing: 0.5px;
+    }
+    .silver .plan-free-tag { background: #1976d2; color: #fff; }
+    .golden .plan-free-tag { background: #e91e63; color: #fff; }
+    .plan-features { list-style: none; margin-bottom: 20px; }
+    .plan-features li {
+      padding: 6px 0; font-size: 0.84rem; font-weight: 600;
+      border-bottom: 1px dashed rgba(0,0,0,0.1); display: flex; align-items: flex-start; gap: 6px;
+    }
+    .premium .plan-features li { color: #5d4037; }
+    .silver .plan-features li { color: #1a237e; }
+    .golden .plan-features li { color: #880e4f; }
+    .plan-btn {
+      width: 100%; padding: 13px; border: none; border-radius: 30px;
+      font-weight: 800; font-size: 0.95rem; cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s; letter-spacing: 0.3px;
+    }
+    .premium .plan-btn { background: linear-gradient(90deg, #ff8f00, #ffa000); color: #fff; box-shadow: 0 4px 16px rgba(255,143,0,0.4); }
+    .silver .plan-btn { background: linear-gradient(90deg, #1565c0, #1976d2); color: #fff; box-shadow: 0 4px 16px rgba(21,101,192,0.4); }
+    .golden .plan-btn { background: linear-gradient(90deg, #c2185b, #e91e63); color: #fff; box-shadow: 0 4px 16px rgba(194,24,91,0.4); }
+    .plan-btn:hover { transform: translateY(-3px) scale(1.03); }
+    .trust-strip {
+      display: flex; justify-content: center; gap: 28px; flex-wrap: wrap;
+      margin-top: 50px; position: relative; z-index: 1;
+    }
+    .trust-item {
+      text-align: center; font-size: 0.85rem; color: #444; font-weight: 700;
+      background: rgba(255,255,255,0.75); backdrop-filter: blur(6px);
+      padding: 12px 20px; border-radius: 16px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .trust-item span { display: block; font-size: 1.6rem; margin-bottom: 4px; }
+    @media (max-width: 768px) {
+      .plans-grid { grid-template-columns: 1fr; }
+      .products-deco-left, .products-deco-right { display: none; }
+    }
+
+    /* ORDER */
+    #order { padding: 80px 5%; background: #fff; }
+    .order-title { text-align: center; margin-bottom: 40px; }
+    .order-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 40px; max-width: 950px; margin: 0 auto; }
+    .cart-box { background: var(--light-bg); border-radius: 20px; padding: 28px; }
+    .cart-box h3 { font-size: 1.15rem; font-weight: 800; color: var(--dark); margin-bottom: 20px; }
+    .cart-empty { color: #aaa; font-size: 0.9rem; margin-bottom: 20px; }
+    .cart-empty strong { display: block; margin-bottom: 6px; color: #bbb; }
+    .cart-total { border-top: 2px solid #eee; padding-top: 16px; display: flex; justify-content: space-between; font-weight: 700; }
+    .place-order-btn {
+      width: 100%; padding: 14px; background: var(--primary); color: #fff;
+      border: none; border-radius: 25px; font-weight: 800; font-size: 1rem;
+      cursor: pointer; margin-top: 16px; transition: all 0.2s;
+    }
+    .place-order-btn:hover { background: #e55a28; transform: translateY(-2px); }
+    .delivery-box { background: #fff; border-radius: 20px; padding: 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+    .delivery-box h3 { font-size: 1.15rem; font-weight: 800; color: var(--dark); margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; position: relative; }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%; padding: 12px 16px 12px 40px; border: 2px solid #eee;
+      border-radius: 12px; font-size: 0.92rem; transition: border 0.2s; outline: none;
+      font-family: inherit;
+    }
+    .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+    .form-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 1rem; }
+
+    /* TESTIMONIALS */
+    #testimonials { padding: 80px 5%; background: var(--light-bg); }
+    .testimonials-header { text-align: center; margin-bottom: 44px; }
+    .testimonials-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; max-width: 1100px; margin: 0 auto; }
+    .testimonial-card {
+      background: #fff; border-radius: 20px; padding: 28px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06); position: relative;
+    }
+    .quote-mark { font-size: 2rem; color: var(--secondary); line-height: 1; }
+    .testimonial-text { font-size: 0.9rem; color: #555; line-height: 1.7; margin: 10px 0 20px; }
+    .testimonial-author { display: flex; align-items: center; gap: 12px; }
+    .author-avatar { font-size: 1.8rem; }
+    .author-name { font-weight: 800; font-size: 0.9rem; color: var(--dark); }
+    .author-meta { font-size: 0.78rem; color: #aaa; }
+    .stars { color: #ffc107; font-size: 0.85rem; margin-bottom: 2px; }
+
+    /* FOOTER */
+    footer { background: var(--dark); color: #ccc; padding: 60px 5% 30px; }
+    .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+    .footer-brand .nav-logo { color: var(--secondary); font-size: 1.5rem; }
+    .footer-brand p { margin-top: 14px; font-size: 0.88rem; line-height: 1.7; color: #aaa; }
+    .footer-social { display: flex; gap: 12px; margin-top: 20px; }
+    .social-btn {
+      width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      text-decoration: none; color: #fff; font-size: 0.8rem; font-weight: 700;
+      transition: background 0.2s;
+    }
+    .social-btn:hover { background: var(--primary); }
+    .footer-col h4 { color: #fff; font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; }
+    .footer-col ul { list-style: none; }
+    .footer-col ul li { margin-bottom: 10px; }
+    .footer-col ul li a { color: #aaa; text-decoration: none; font-size: 0.88rem; transition: color 0.2s; }
+    .footer-col ul li a:hover { color: var(--secondary); }
+    .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; text-align: center; font-size: 0.83rem; color: #777; }
+
+    /* CART SIDEBAR */
+    .cart-sidebar {
+      position: fixed; right: -380px; top: 0; width: 360px; height: 100vh;
+      background: #fff; box-shadow: -10px 0 40px rgba(0,0,0,0.15);
+      z-index: 2000; transition: right 0.3s ease; padding: 24px; overflow-y: auto;
+    }
+    .cart-sidebar.open { right: 0; }
+    .cart-sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .cart-sidebar-header h3 { font-size: 1.2rem; font-weight: 800; }
+    .close-cart { background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #999; }
+    .cart-sidebar-total { font-weight: 800; font-size: 1.1rem; margin: 16px 0; }
+    .goto-order-btn {
+      display: block; text-align: center; background: var(--primary); color: #fff;
+      padding: 13px; border-radius: 25px; font-weight: 700; text-decoration: none;
+      transition: background 0.2s;
+    }
+    .goto-order-btn:hover { background: #e55a28; }
+    .cart-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1999;
+    }
+    .cart-overlay.open { display: block; }
+
+    /* ===================== CHATBOT ===================== */
+    #chat-fab {
+      position: fixed; bottom: 28px; right: 28px; z-index: 3000;
+      width: 60px; height: 60px; border-radius: 50%;
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: #fff; border: none; cursor: pointer; font-size: 1.6rem;
+      box-shadow: 0 6px 24px rgba(37,211,102,0.5);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: pulse-chat 2.5s infinite;
+    }
+    #chat-fab:hover { transform: scale(1.1); box-shadow: 0 8px 32px rgba(37,211,102,0.65); animation: none; }
+    @keyframes pulse-chat {
+      0%, 100% { box-shadow: 0 6px 24px rgba(37,211,102,0.5); }
+      50% { box-shadow: 0 6px 36px rgba(37,211,102,0.8), 0 0 0 10px rgba(37,211,102,0.1); }
+    }
+    .chat-tooltip {
+      position: fixed; bottom: 96px; right: 28px; z-index: 3001;
+      background: var(--dark); color: #fff; padding: 8px 14px;
+      border-radius: 20px; font-size: 0.82rem; font-weight: 600;
+      white-space: nowrap; pointer-events: none;
+      opacity: 1; transition: opacity 0.3s;
+    }
+    .chat-tooltip::after {
+      content: ''; position: absolute; bottom: -6px; right: 22px;
+      border: 6px solid transparent; border-top-color: var(--dark); border-bottom: none;
+    }
+    .chat-tooltip.hidden { opacity: 0; }
+
+    #chat-window {
+      position: fixed; bottom: 100px; right: 28px; z-index: 3000;
+      width: 340px; max-height: 520px;
+      background: #fff; border-radius: 20px;
+      box-shadow: 0 10px 50px rgba(0,0,0,0.18);
+      display: flex; flex-direction: column; overflow: hidden;
+      transform: scale(0.85) translateY(20px); opacity: 0;
+      pointer-events: none; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+      transform-origin: bottom right;
+    }
+    #chat-window.open {
+      transform: scale(1) translateY(0); opacity: 1; pointer-events: all;
+    }
+    .chat-header {
+      background: linear-gradient(135deg, #25D366, #128C7E);
+      color: #fff; padding: 16px 18px; display: flex; align-items: center; gap: 12px;
+    }
+    .chat-avatar {
+      width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+    }
+    .chat-header-info { flex: 1; }
+    .chat-header-info strong { display: block; font-size: 0.95rem; }
+    .chat-header-info span { font-size: 0.75rem; opacity: 0.85; }
+    .chat-close-btn { background: none; border: none; color: #fff; font-size: 1.3rem; cursor: pointer; opacity: 0.8; }
+    .chat-close-btn:hover { opacity: 1; }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px; display: flex;
+      flex-direction: column; gap: 12px; background: #f0f2f5;
+    }
+    .chat-msg { max-width: 85%; }
+    .chat-msg.bot { align-self: flex-start; }
+    .chat-msg.user { align-self: flex-end; }
+    .chat-bubble {
+      padding: 10px 14px; border-radius: 16px; font-size: 0.88rem; line-height: 1.5;
+    }
+    .bot .chat-bubble {
+      background: #fff; color: #333;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    }
+    .user .chat-bubble {
+      background: #25D366; color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+    .chat-time { font-size: 0.68rem; color: #aaa; margin-top: 4px; padding: 0 4px; }
+    .bot .chat-time { text-align: left; }
+    .user .chat-time { text-align: right; }
+    .typing-indicator { display: flex; gap: 5px; padding: 12px 14px; }
+    .typing-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #ccc;
+      animation: typing 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typing { 0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)} }
+    .chat-input-area {
+      padding: 12px 14px; background: #fff;
+      border-top: 1px solid #eee; display: flex; gap: 10px; align-items: center;
+    }
+    #chat-input {
+      flex: 1; padding: 10px 14px; border: 2px solid #eee;
+      border-radius: 25px; font-size: 0.88rem; outline: none;
+      font-family: inherit; transition: border 0.2s;
+    }
+    #chat-input:focus { border-color: #25D366; }
+    #chat-send {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: #25D366; color: #fff; border: none; cursor: pointer;
+      font-size: 1rem; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+    #chat-send:hover { background: #128C7E; transform: scale(1.1); }
+    .chat-quick-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .quick-reply {
+      background: #fff; border: 1.5px solid #25D366; color: #128C7E;
+      padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .quick-reply:hover { background: #25D366; color: #fff; }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .about-grid, .order-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr 1fr; }
+      #chat-window { width: calc(100vw - 32px); right: 16px; bottom: 90px; }
+      #chat-fab { right: 16px; bottom: 20px; }
+      .chat-tooltip { right: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">B'N'T <span>Book 'N' Toys</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#products">Our Packages</a></li>
+    <li><a href="#order">Order</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+  </ul>
+  <button class="cart-btn" onclick="toggleCart()">🛒 Cart <span id="cart-count">0</span></button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-content">
+    <div class="hero-badge">🌟 Kids' Book & Toy Hub</div>
+    <h1>Books & Toys for <span>Joyful Learning!</span></h1>
+    <p>Discover a world of imagination — affordable weekly plans for age-appropriate books and educational toys, delivered right to your door. No clutter. Just fun!</p>
+    <div class="hero-btns">
+      <a href="#products" class="btn-primary">Explore Packages 📦</a>
+      <a href="#about" class="btn-outline">How It Works</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><strong>500+</strong><span>Items in Stock</span></div>
+      <div class="stat"><strong>2K+</strong><span>Happy Families</span></div>
+      <div class="stat"><strong>₹99</strong><span>Starts From</span></div>
+    </div>
+    <div class="hero-badges">
+      <div class="badge-pill">🧩 <strong>STEM Puzzles</strong> Available!</div>
+      <div class="badge-pill">⭐ <strong>4.9 Rating</strong> 200+ reviews</div>
+      <div class="badge-pill">🚚 <strong>Free Delivery</strong> First order</div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text">
+      <span class="section-tag">About Us</span>
+      <h2 class="section-title">Learning Shouldn't Break the Bank</h2>
+      <p>Book'N'Toys was born from a simple idea: kids grow fast, and so do their interests. Why buy expensive books and toys that get outgrown in weeks?</p>
+      <p>We curate the best age-appropriate titles and educational toys, and rent them to families at a fraction of the cost. Every item is sanitized, quality-checked, and delivered with care. Return when ready — no stress, no pressure!</p>
+      <div class="about-features">
+        <div class="feature-chip">🧼 Sanitized & Safe</div>
+        <div class="feature-chip">📦 Fast Delivery</div>
+        <div class="feature-chip">♻️ Eco-Friendly</div>
+        <div class="feature-chip">💛 Expert Curated</div>
+      </div>
+      <br>
+      <a href="#products" class="btn-primary">Explore Packages</a>
+    </div>
+    <div class="about-visual">
+      🧸📖🎓
+      <p>Est. 2021 🎉</p>
+      <span>Trusted by 2000+ families across India</span>
+    </div>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section id="products">
+  <div class="products-deco-left">🧸<br>🎨<br>🚂</div>
+  <div class="products-deco-right">🦕<br>🎯<br>📚</div>
+  <div class="products-header">
+    <div class="fun-tag">📦 Our Boxes</div>
+    <h2>Choose Your Plans</h2>
+    <p style="color:#555;font-weight:600;font-size:1rem;">🌟 Fun. Learn. Grow!</p>
+  </div>
+  <div class="plans-grid">
+
+    <!-- PREMIUM -->
+    <div class="plan-card premium">
+      <div class="plan-top-badge">⭐ PREMIUM BOX</div>
+      <span class="plan-icon-big">🧸</span>
+      <div class="plan-name">PREMIUM BOX</div>
+      <div class="plan-price">₹1,999</div>
+      <ul class="plan-features">
+        <li>✔ 5 Toys (1 Big + 2 Development + 2 Educational)</li>
+        <li>✔ Perfect for Children & Kids Education – Enjoy</li>
+        <li>✔ Premium Quality Guaranteed</li>
+      </ul>
+      <button class="plan-btn" onclick="addToCart('Premium Box', 1999)">Get Premium Box 🧸</button>
+    </div>
+
+    <!-- SILVER -->
+    <div class="plan-card silver">
+      <div class="plan-top-badge">🛡️ SILVER BOX</div>
+      <span class="plan-icon-big">🚗</span>
+      <div class="plan-name">SILVER BOX</div>
+      <div class="plan-price">₹2,599</div>
+      <div class="plan-free-tag">FIRST DELIVERY FREE</div>
+      <ul class="plan-features">
+        <li>✔ 5 Toys (1 Big + 2 Development + 2 Educational)</li>
+        <li>✔ Choose from 40 Premium Toys and 30 Books</li>
+        <li>✔ Perfect for Children & Kids Education – Enjoy</li>
+        <li>✔ Premium Quality Guaranteed</li>
+      </ul>
+      <button class="plan-btn" onclick="addToCart('Silver Box', 2599)">Get Silver Box 🚗</button>
+    </div>
+
+    <!-- GOLDEN -->
+    <div class="plan-card golden">
+      <div class="plan-top-badge">👑 GOLDEN BOX</div>
+      <span class="plan-icon-big">🎁</span>
+      <div class="plan-name">GOLDEN BOX</div>
+      <div class="plan-price">₹2,999</div>
+      <div class="plan-free-tag">FIRST DELIVERY FREE</div>
+      <ul class="plan-features">
+        <li>✔ 5 Toys (1 Big + 2 Development + 2 Educational)</li>
+        <li>✔ Choose from 50 Premium Toys and 40 Books</li>
+        <li>✔ Perfect for Children & Kids Education – Enjoy</li>
+        <li>✔ Premium Quality Guaranteed</li>
+      </ul>
+      <button class="plan-btn" onclick="addToCart('Golden Box', 2999)">Get Golden Box 👑</button>
+    </div>
+
+  </div>
+  <div class="trust-strip">
+    <div class="trust-item"><span>🛡️</span>Safe & Non-Toxic</div>
+    <div class="trust-item"><span>✅</span>Premium Quality</div>
+    <div class="trust-item"><span>🚚</span>Fast & Free Delivery*</div>
+    <div class="trust-item"><span>😊</span>Loved by Kids & Parents</div>
+  </div>
+</section>
+
+<!-- ORDER -->
+<section id="order">
+  <div class="order-title">
+    <h2 class="section-title">Your Rental Cart</h2>
+    <p>Review your items and fill in delivery details to proceed</p>
+  </div>
+  <div class="order-grid">
+    <div class="cart-box">
+      <h3>🛒 Your Cart</h3>
+      <div id="cart-items-list">
+        <div class="cart-empty"><strong>Your cart is currently empty.</strong>Visit our packages to add items.</div>
+      </div>
+      <div class="cart-total">
+        <span>Weekly Total</span>
+        <strong id="cart-total-display">₹0</strong>
+      </div>
+      <button class="place-order-btn" onclick="placeOrder()">Place Order & Pay 🎊</button>
+    </div>
+    <div class="delivery-box">
+      <h3>📋 Delivery Details</h3>
+      <div class="form-group">
+        <span class="form-icon">👤</span>
+        <input type="text" id="field-name" placeholder="Full Name" />
+      </div>
+      <div class="form-group">
+        <span class="form-icon">📞</span>
+        <input type="tel" id="field-phone" placeholder="Phone" />
+      </div>
+      <div class="form-group">
+        <span class="form-icon">🧒</span>
+        <select id="field-age">
+          <option value="">Child's Age</option>
+          <option>0–3 years</option>
+          <option>4–7 years</option>
+          <option>8–12 years</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <span class="form-icon">✉️</span>
+        <input type="email" id="field-email" placeholder="Email Address" />
+      </div>
+      <div class="form-group">
+        <span class="form-icon">📍</span>
+        <input type="text" id="field-address" placeholder="Delivery Address" />
+      </div>
+      <div class="form-group">
+        <span class="form-icon">📅</span>
+        <select id="field-rent">
+          <option>1 Week</option>
+          <option>2 Weeks</option>
+          <option>1 Month</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="testimonials-header">
+    <h2 class="section-title">What Parents Say ❤️</h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card">
+      <div class="quote-mark">💬</div>
+      <p class="testimonial-text">We tried multiple rental services but Book'N'Toys is by far the best. Clean toys, great books, and the app makes ordering simple. A must for every family!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">🧑</div>
+        <div>
+          <div class="stars">★★★★★</div>
+          <div class="author-name">Arjun & Pooja</div>
+          <div class="author-meta">Parents · Hyderabad</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote-mark">💬</div>
+      <p class="testimonial-text">My 4-year-old has become an absolute bookworm thanks to Book'N'Toys! The selection is fantastic and items arrive in perfect condition. Such a brilliant concept!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👩</div>
+        <div>
+          <div class="stars">★★★★★</div>
+          <div class="author-name">Ananya Krishnan</div>
+          <div class="author-meta">Mom of 2 · Chennai</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote-mark">💬</div>
+      <p class="testimonial-text">The STEM toys are absolutely wonderful. My son learned basic circuits through play! Delivery was same-day and the customer service is top-notch. Highly recommend!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👨</div>
+        <div>
+          <div class="stars">★★★★★</div>
+          <div class="author-name">Rajan Mehta</div>
+          <div class="author-meta">Dad · Bangalore</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote-mark">💬</div>
+      <p class="testimonial-text">Affordable, eco-friendly and genuinely fun — what more could you want? My twins go crazy every time a new package arrives. We've been subscribers for 8 months!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👩</div>
+        <div>
+          <div class="stars">★★★★★</div>
+          <div class="author-name">Meena Subramaniam</div>
+          <div class="author-meta">Mom of twins · Coimbatore</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card">
+      <div class="quote-mark">💬</div>
+      <p class="testimonial-text">The puzzle sets kept my 8-year-old occupied for hours! Great quality, reasonable prices, and the return process is easy. We're obsessed with this service!</p>
+      <div class="testimonial-author">
+        <div class="author-avatar">👩</div>
+        <div>
+          <div class="stars">★★★★★</div>
+          <div class="author-name">Lakshmi Nair</div>
+          <div class="author-meta">Mom · Kerala</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#hero" class="nav-logo">B'N'T Book 'N' Toys</a>
+      <p>Making childhood magical — one rented book and toy at a time. Affordable, sustainable, and always fun.</p>
+      <div class="footer-social">
+        <a href="#" class="social-btn">f</a>
+        <a href="#" class="social-btn">in</a>
+        <a href="#" class="social-btn">✕</a>
+        <a href="#" class="social-btn">W</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#hero">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#products">Our Packages</a></li>
+        <li><a href="#order">Order</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Categories</h4>
+      <ul>
+        <li><a href="#products">Books 0–3</a></li>
+        <li><a href="#products">Books 4–7</a></li>
+        <li><a href="#products">Books 8–12</a></li>
+        <li><a href="#products">STEM Toys</a></li>
+        <li><a href="#products">Soft Toys</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Support</h4>
+      <ul>
+        <li><a href="#">How It Works</a></li>
+        <li><a href="#">Pricing Plans</a></li>
+        <li><a href="#">Return Policy</a></li>
+        <li><a href="#">FAQ</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    © 2025 Book'N'Toys. Made with ❤️ in Coimbatore, Tamil Nadu. All rights reserved.
+    <br><a href="https://dainty-parfait-af70eb.netlify.app/" target="_blank" style="color:#555;font-size:0.72rem;text-decoration:none;opacity:0.25;margin-top:6px;display:inline-block;" title="Admin Access">⚙️</a>
+  </div>
+</footer>
+
+<!-- CART SIDEBAR -->
+<div class="cart-overlay" id="cart-overlay" onclick="toggleCart()"></div>
+<div class="cart-sidebar" id="cart-sidebar">
+  <div class="cart-sidebar-header">
+    <h3>🛒 Your Cart</h3>
+    <button class="close-cart" onclick="toggleCart()">✕</button>
+  </div>
+  <div id="sidebar-cart-items">
+    <p style="color:#aaa;font-size:0.9rem;">Your cart is empty.</p>
+  </div>
+  <div class="cart-sidebar-total">Total: <span id="sidebar-total">₹0</span></div>
+  <a href="#order" class="goto-order-btn" onclick="toggleCart()">Go to Order Form ➜</a>
+</div>
+
+<!-- ===================== CHATBOT ===================== -->
+<div class="chat-tooltip" id="chat-tooltip">💬 Chat with us!</div>
+<button id="chat-fab" onclick="toggleChat()" title="Chat with us">
+  💬
+</button>
+
+<div id="chat-window">
+  <div class="chat-header">
+    <div class="chat-avatar">🤖</div>
+    <div class="chat-header-info">
+      <strong>Book'N'Toys</strong>
+      <span>🟢 Online</span>
+    </div>
+    <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-messages" id="chat-messages"></div>
+  <div class="chat-input-area">
+    <input type="text" id="chat-input" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendUserMsg()" />
+    <button id="chat-send" onclick="sendUserMsg()">➤</button>
+  </div>
+</div>
+
+<script>
+// ========== CART ==========
+let cart = [];
+
+function addToCart(name, price) {
+  cart.push({name, price});
+  updateCart();
+  toggleCart();
+}
+
+function removeFromCart(idx) {
+  cart.splice(idx, 1);
+  updateCart();
+}
+
+function updateCart() {
+  const total = cart.reduce((s,i) => s+i.price, 0);
+
+  // Nav badge
+  document.getElementById('cart-count').textContent = cart.length;
+
+  // --- SIDEBAR ---
+  const sidebarList = document.getElementById('sidebar-cart-items');
+  document.getElementById('sidebar-total').textContent = '₹'+total.toLocaleString();
+  if(cart.length === 0){
+    sidebarList.innerHTML = '<p style="color:#aaa;font-size:0.9rem;">Your cart is empty.</p>';
+  } else {
+    sidebarList.innerHTML = cart.map((i,idx) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0f0f0;font-size:0.9rem;">
+        <span>${i.name}</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-weight:700;color:var(--primary)">₹${i.price.toLocaleString()}</span>
+          <button onclick="removeFromCart(${idx})" style="background:#fee2e2;border:none;color:#dc2626;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.8rem;font-weight:700;">✕</button>
+        </div>
+      </div>`).join('');
+  }
+
+  // --- ORDER SECTION cart-items-list ---
+  const orderList = document.getElementById('cart-items-list');
+  document.getElementById('cart-total-display').textContent = '₹'+total.toLocaleString();
+  if(cart.length === 0){
+    orderList.innerHTML = '<div class="cart-empty"><strong>Your cart is currently empty.</strong>Visit our packages to add items.</div>';
+  } else {
+    orderList.innerHTML = cart.map((i,idx) => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eee;font-size:0.92rem;">
+        <span style="font-weight:600;">📦 ${i.name}</span>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span style="font-weight:800;color:var(--primary)">₹${i.price.toLocaleString()}</span>
+          <button onclick="removeFromCart(${idx})" style="background:#fee2e2;border:none;color:#dc2626;border-radius:50%;width:22px;height:22px;cursor:pointer;font-size:0.8rem;font-weight:700;">✕</button>
+        </div>
+      </div>`).join('');
+  }
+}
+
+function toggleCart(){
+  document.getElementById('cart-sidebar').classList.toggle('open');
+  document.getElementById('cart-overlay').classList.toggle('open');
+}
+
+let captchaText = '';
+
+function getFormData() {
+  return {
+    name:    document.getElementById('field-name').value.trim(),
+    phone:   document.getElementById('field-phone').value.trim(),
+    email:   document.getElementById('field-email').value.trim(),
+    address: document.getElementById('field-address').value.trim(),
+    age:     document.getElementById('field-age').value,
+    rent:    document.getElementById('field-rent').value,
+  };
+}
+
+function generateCaptcha() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  captchaText = '';
+  for (let i = 0; i < 6; i++) captchaText += chars[Math.floor(Math.random() * chars.length)];
+  const canvas = document.getElementById('captcha-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const grad = ctx.createLinearGradient(0,0,canvas.width,canvas.height);
+  grad.addColorStop(0,'#fff5f0'); grad.addColorStop(1,'#ffe8d6');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let i=0;i<80;i++){
+    ctx.beginPath();
+    ctx.arc(Math.random()*canvas.width,Math.random()*canvas.height,Math.random()*2,0,Math.PI*2);
+    ctx.fillStyle=`rgba(${Math.floor(Math.random()*200)},${Math.floor(Math.random()*200)},${Math.floor(Math.random()*200)},0.4)`;
+    ctx.fill();
+  }
+  for(let i=0;i<5;i++){
+    ctx.beginPath();
+    ctx.moveTo(Math.random()*canvas.width,Math.random()*canvas.height);
+    ctx.lineTo(Math.random()*canvas.width,Math.random()*canvas.height);
+    ctx.strokeStyle=`rgba(${Math.floor(Math.random()*180)},${Math.floor(Math.random()*180)},${Math.floor(Math.random()*180)},0.35)`;
+    ctx.lineWidth=1.2; ctx.stroke();
+  }
+  const colors=['#ff6b35','#1a1a2e','#f72585','#7209b7','#3a86ff','#06d6a0'];
+  const fonts=['Arial Black','Georgia','Courier New','Trebuchet MS','Impact'];
+  captchaText.split('').forEach((ch,i)=>{
+    ctx.save();
+    ctx.translate(18+i*37, 48+(Math.random()*12-6));
+    ctx.rotate((Math.random()-0.5)*0.5);
+    ctx.font=`bold ${28+Math.floor(Math.random()*8)}px ${fonts[Math.floor(Math.random()*fonts.length)]}`;
+    ctx.fillStyle=colors[Math.floor(Math.random()*colors.length)];
+    ctx.shadowColor='rgba(0,0,0,0.15)'; ctx.shadowBlur=3;
+    ctx.fillText(ch,0,0); ctx.restore();
+  });
+}
+
+function placeOrder() {
+  if (cart.length === 0) {
+    document.getElementById('products').scrollIntoView({behavior:'smooth'});
+    showToast('🛒 Your cart is empty! Please add a box first.');
+    return;
+  }
+  const f = getFormData();
+  if (!f.name || !f.phone || !f.address) {
+    showToast('📋 Please fill in your Name, Phone & Delivery Address.');
+    return;
+  }
+  if (!/^[6-9]\d{9}$/.test(f.phone.replace(/\s/g,''))) {
+    showToast('📞 Please enter a valid 10-digit mobile number.');
+    return;
+  }
+  document.getElementById('otp-input').value = '';
+  document.getElementById('otp-error').textContent = '';
+  document.getElementById('otp-overlay').classList.add('open');
+  setTimeout(() => generateCaptcha(), 100);
+}
+
+function verifyOTP() {
+  const entered = document.getElementById('otp-input').value.trim().toUpperCase();
+  const errEl   = document.getElementById('otp-error');
+  const f       = getFormData();
+  const passed  = entered === captchaText;
+
+  const attempt = {
+    attemptId: 'CAP-'+Math.floor(100000+Math.random()*900000),
+    name:     f.name  || '—',
+    phone:    f.phone || '—',
+    entered:  entered || '(empty)',
+    expected: captchaText,
+    result:   passed ? '✅ Passed' : '❌ Failed',
+    date:     new Date().toLocaleString('en-IN')
+  };
+
+  // Save to Firebase
+  if (window.firebaseReady) {
+    window.db.collection('captcha').add({
+      ...attempt, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).catch(e => console.log('Firebase captcha error:', e));
+  }
+
+  // Also save to localStorage as backup
+  const attempts = JSON.parse(localStorage.getItem('bnt_captcha')||'[]');
+  attempts.unshift(attempt);
+  localStorage.setItem('bnt_captcha', JSON.stringify(attempts));
+
+  if (!entered) { errEl.textContent = '⚠️ Please type the characters shown.'; return; }
+  if (!passed) {
+    errEl.textContent = '❌ Incorrect. Please try again.';
+    document.getElementById('otp-input').value = '';
+    generateCaptcha(); return;
+  }
+  document.getElementById('otp-overlay').classList.remove('open');
+  const total = cart.reduce((s,i) => s+i.price, 0);
+  document.getElementById('pay-items-mini').innerHTML = cart.map(i=>`
+    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:0.85rem;">
+      <span>📦 ${i.name}</span><strong style="color:#ff6b35">₹${i.price.toLocaleString()}</strong>
+    </div>`).join('');
+  document.getElementById('pay-name').textContent    = f.name;
+  document.getElementById('pay-phone').textContent   = f.phone;
+  document.getElementById('pay-address').textContent = f.address;
+  document.getElementById('pay-total-header').textContent = '₹'+total.toLocaleString();
+  document.getElementById('pay-btn-text').textContent = 'Pay ₹'+total.toLocaleString();
+  document.getElementById('pay-modal-overlay').classList.add('open');
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.pay-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.pay-tab-content').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+function formatCard(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+function formatExpiry(el) {
+  let v = el.value.replace(/\D/g,'');
+  if(v.length>=2) v = v.substring(0,2)+'/'+v.substring(2,4);
+  el.value = v;
+}
+function selectUpiApp(el, suffix) {
+  document.querySelectorAll('.upi-app').forEach(a=>a.classList.remove('selected'));
+  el.classList.add('selected');
+  const inp = document.getElementById('upi-id');
+  if(!inp.value.includes('@')) inp.value = inp.value + suffix;
+}
+function selectBank(el, bank) {
+  document.querySelectorAll('.nb-bank-chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('nb-bank').value = bank;
+}
+
+function processPayment() {
+  const activeTab = document.querySelector('.pay-tab-content.active').id;
+  // Basic validation
+  if(activeTab === 'tab-card') {
+    const num = document.getElementById('card-number').value.replace(/\s/g,'');
+    const exp = document.getElementById('card-expiry').value;
+    const cvv = document.getElementById('card-cvv').value;
+    const nm  = document.getElementById('card-name').value.trim();
+    if(num.length < 16 || !exp.includes('/') || cvv.length < 3 || !nm){
+      showToast('💳 Please fill in all card details correctly.'); return;
+    }
+  } else if(activeTab === 'tab-upi') {
+    const upi = document.getElementById('upi-id').value.trim();
+    if(!upi.includes('@')){ showToast('📲 Please enter a valid UPI ID.'); return; }
+  } else if(activeTab === 'tab-netbanking') {
+    const bank = document.getElementById('nb-bank').value;
+    if(!bank){ showToast('🏦 Please select your bank.'); return; }
+  }
+  // Show processing animation
+  const btn = document.getElementById('pay-btn-text');
+  btn.textContent = '⏳ Processing...';
+  document.querySelector('.pay-confirm-btn').disabled = true;
+  setTimeout(()=>{ confirmPayment(); }, 2000);
+}
+
+function confirmPayment() {
+  const f = getFormData();
+  const orderId = 'BNT-' + Math.floor(100000 + Math.random()*900000);
+  const total   = cart.reduce((s,i)=>s+i.price,0);
+  const payMethod = document.querySelector('.pay-tab.active').textContent.trim();
+  const dateStr = new Date().toLocaleString('en-IN');
+  const order = {
+    orderId,
+    name:          f.name,
+    phone:         f.phone,
+    email:         f.email,
+    address:       f.address,
+    age:           f.age,
+    rent:          f.rent,
+    items:         cart.map(i=>i.name).join(', '),
+    total:         '₹'+total.toLocaleString(),
+    paymentMethod: payMethod,
+    date:          dateStr,
+    status:        'Confirmed'
+  };
+
+  // Save to Google Sheets via SheetDB
+  console.log('Sending to SheetDB:', JSON.stringify({ data: [order] }));
+  fetch('https://sheetdb.io/api/v1/6ufb9ebyrium7?sheet=Sheet1', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: [order] })
+  }).then(res => res.json())
+    .then(res => {
+      console.log('✅ Order saved to Google Sheets', res);
+      showToast('✅ Order saved successfully!');
+    }).catch(e => {
+      console.log('SheetDB error:', e);
+      showToast('⚠️ Save error: ' + e.message);
+    });
+
+  // Also save to localStorage as backup
+  const orders = JSON.parse(localStorage.getItem('bnt_orders')||'[]');
+  orders.unshift(order);
+  localStorage.setItem('bnt_orders', JSON.stringify(orders));
+
+  // ── Build email bill ──
+  const itemLines = cart.map(i => `  • ${i.name}   ₹${i.price.toLocaleString()}`).join('\n');
+  const emailSubject = `Your Book'N'Toys Order Confirmation – #${orderId}`;
+  const emailBody =
+`🎉 Thank you for your order, ${f.name}!
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+        BOOK'N'TOYS — ORDER BILL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 ORDER DETAILS
+Order ID   : #${orderId}
+Date       : ${dateStr}
+Status     : ✅ Confirmed
+
+👤 CUSTOMER INFO
+Name       : ${f.name}
+Phone      : ${f.phone}
+Email      : ${f.email}
+Address    : ${f.address}
+Child Age  : ${f.age}
+Rent Period: ${f.rent}
+
+🛒 ITEMS ORDERED
+${itemLines}
+
+💳 Payment Method : ${payMethod}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+💰 TOTAL PAID     : ₹${total.toLocaleString()}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Our team will contact you shortly to confirm your delivery.
+Thank you for choosing Book'N'Toys! 🧸📚
+
+📞 Contact us: +91 98765 43210
+🌐 bookntoyz.netlify.app
+
+Made with ❤️ in Coimbatore, Tamil Nadu`;
+
+  // Auto-send bill email via EmailJS
+  if (f.email) {
+    emailjs.send('service_hgcjvhf', 'template_4gd7cbx', {
+      to_email: f.email,
+      subject:  emailSubject,
+      message:  emailBody
+    }).then(() => {
+      console.log('✅ Bill email sent to', f.email);
+      showToast('📧 Bill sent to ' + f.email + '!');
+    }).catch(err => {
+      console.log('EmailJS error:', err);
+      showToast('⚠️ Email error: ' + (err.text || err.message || JSON.stringify(err)));
+    });
+  }
+
+  document.getElementById('pay-modal-overlay').classList.remove('open');
+  document.getElementById('success-overlay').classList.add('open');
+
+  // Populate success card
+  document.getElementById('order-id').textContent = orderId.replace('BNT-','');
+  document.getElementById('success-customer-name').textContent = f.name;
+  document.getElementById('success-items-list').innerHTML = cart.map(i =>
+    `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:0.85rem;">
+      <span>📦 ${i.name}</span><strong style="color:#ff6b35;">₹${i.price.toLocaleString()}</strong>
+    </div>`
+  ).join('');
+  document.getElementById('success-total').textContent = '₹'+total.toLocaleString();
+  document.getElementById('success-rent').textContent  = f.rent;
+  document.getElementById('success-age-display').textContent = f.age || '—';
+  document.getElementById('success-email-display').textContent = f.email || '(no email entered)';
+
+  cart = [];
+  updateCart();
+  document.getElementById('pay-btn-text').textContent = 'Pay Now';
+  document.querySelector('.pay-confirm-btn').disabled = false;
+}
+
+
+
+function closeSuccess() {
+  document.getElementById('success-overlay').classList.remove('open');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ========== CHATBOT ==========
+let chatOpen = false;
+let step = 0;
+let userData = { name:'', phone:'', age:'', message:'' };
+let tooltipTimer;
+
+const steps = [
+  { key: null, bot: "👋 Hi there! Welcome to *Book'N'Toys*! 🧸📚\n\nI'm here to help you get started. Would you like to place an order or ask a question?", quick: ["Place an Order 📦", "Ask a Question ❓"] },
+  { key: 'name', bot: "Great! Let me collect a few details to send to our team on WhatsApp.\n\n👤 What's your *name*?", quick: [] },
+  { key: 'phone', bot: "Nice to meet you, {name}! 😊\n\n📞 What's your *WhatsApp number*?", quick: [] },
+  { key: 'age', bot: "Got it! 👍\n\n🧒 What is your *child's age group*?", quick: ["0–3 years 👶", "4–7 years 🧒", "8–12 years 🧑"] },
+  { key: 'message', bot: "Perfect!\n\n💬 What would you like to *tell us* or ask? (e.g. which plan you want, questions, etc.)", quick: [] },
+  { key: null, bot: "✅ Thank you, *{name}*! Your details are ready.\n\nClick below to send them to us on WhatsApp and we'll get back to you within minutes! 🚀", quick: ["Send on WhatsApp 💬", "Start Over 🔄"] }
+];
+
+function toggleChat() {
+  chatOpen = !chatOpen;
+  const win = document.getElementById('chat-window');
+  win.classList.toggle('open', chatOpen);
+  const tooltip = document.getElementById('chat-tooltip');
+  tooltip.classList.add('hidden');
+  if(chatOpen && document.getElementById('chat-messages').children.length === 0) {
+    setTimeout(() => botSay(steps[0].bot, steps[0].quick), 400);
+  }
+}
+
+function getTime() {
+  return new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+}
+
+function botSay(text, quickReplies=[]) {
+  const msgs = document.getElementById('chat-messages');
+  // typing indicator
+  const typing = document.createElement('div');
+  typing.className = 'chat-msg bot';
+  typing.innerHTML = `<div class="chat-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+
+  setTimeout(() => {
+    msgs.removeChild(typing);
+    const div = document.createElement('div');
+    div.className = 'chat-msg bot';
+    // Replace *text* with bold
+    const formatted = text.replace(/\*(.+?)\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+    let html = `<div class="chat-bubble">${formatted}</div><div class="chat-time">${getTime()}</div>`;
+    if(quickReplies.length) {
+      html += `<div class="chat-quick-replies">${quickReplies.map(r=>`<button class="quick-reply" onclick="handleQuickReply('${r}')">${r}</button>`).join('')}</div>`;
+    }
+    div.innerHTML = html;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }, 900);
+}
+
+function userSay(text) {
+  const msgs = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg user';
+  div.innerHTML = `<div class="chat-bubble">${text}</div><div class="chat-time">${getTime()}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function handleQuickReply(text) {
+  // disable all quick reply buttons
+  document.querySelectorAll('.quick-reply').forEach(b => b.disabled = true);
+  userSay(text);
+  if(text === "Send on WhatsApp 💬") {
+    sendToWhatsApp(); return;
+  }
+  if(text === "Start Over 🔄") {
+    step = 0; userData = {name:'',phone:'',age:'',message:''};
+    setTimeout(()=>botSay(steps[0].bot, steps[0].quick), 500); return;
+  }
+  if(text === "Place an Order 📦" || text === "Ask a Question ❓") {
+    step = 1;
+    setTimeout(()=>botSay(steps[1].bot, steps[1].quick), 500); return;
+  }
+  // age group quick reply
+  if(step === 3) {
+    userData.age = text.replace(/[👶🧒🧑]/g,'').trim();
+    step = 4;
+    setTimeout(()=>botSay(steps[4].bot, steps[4].quick), 500); return;
+  }
+  processInput(text);
+}
+
+function sendUserMsg() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  document.querySelectorAll('.quick-reply').forEach(b => b.disabled = true);
+  userSay(text);
+  processInput(text);
+}
+
+function processInput(text) {
+  if(step === 0) {
+    step = 1;
+    setTimeout(()=>botSay(steps[1].bot, steps[1].quick), 600); return;
+  }
+  if(step === 1) {
+    userData.name = text;
+    step = 2;
+    const msg = steps[2].bot.replace('{name}', userData.name);
+    setTimeout(()=>botSay(msg, steps[2].quick), 600); return;
+  }
+  if(step === 2) {
+    if(!/^[6-9]\d{9}$/.test(text.replace(/\s/g,''))) {
+      setTimeout(()=>botSay("Hmm, that doesn't look like a valid Indian mobile number. Please try again 📞", []), 600); return;
+    }
+    userData.phone = text;
+    step = 3;
+    setTimeout(()=>botSay(steps[3].bot, steps[3].quick), 600); return;
+  }
+  if(step === 3) {
+    userData.age = text;
+    step = 4;
+    setTimeout(()=>botSay(steps[4].bot, steps[4].quick), 600); return;
+  }
+  if(step === 4) {
+    userData.message = text;
+    step = 5;
+    const msg = steps[5].bot.replace('{name}', userData.name);
+    setTimeout(()=>botSay(msg, steps[5].quick), 600); return;
+  }
+}
+
+function sendToWhatsApp() {
+  const waNumber = '919876543210';
+  const msg = `Hello Book'N'Toys! 👋\n\n*New Enquiry from Website:*\n\n👤 Name: ${userData.name}\n📞 Phone: ${userData.phone}\n🧒 Child's Age: ${userData.age}\n💬 Message: ${userData.message}\n\n_Sent via Book'N'Toys website chatbot_`;
+  const url = `https://wa.me/${waNumber}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+
+  const chat = {
+    chatId:  'CHT-' + Math.floor(100000 + Math.random()*900000),
+    name:    userData.name,
+    phone:   userData.phone,
+    age:     userData.age,
+    message: userData.message,
+    date:    new Date().toLocaleString('en-IN'),
+    status:  'New'
+  };
+
+  // Save to Firebase
+  if (window.firebaseReady) {
+    window.db.collection('chats').add({
+      ...chat, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => console.log('✅ Chat saved to Firebase'))
+      .catch(e => console.log('Firebase chat error:', e));
+  }
+
+  // Save to Google Sheets via SheetDB
+  fetch('https://sheetdb.io/api/v1/6ufb9ebyrium7?sheet=Chats', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: [{
+      name:     chat.name,
+      phone:    chat.phone,
+      message:  chat.message,
+      date:     chat.date
+    }] })
+  }).then(res => res.json())
+    .then(() => console.log('✅ Chat saved to Google Sheets'))
+    .catch(e => console.log('SheetDB chat error:', e));
+
+  // Also save to localStorage as backup
+  const chats = JSON.parse(localStorage.getItem('bnt_chats')||'[]');
+  chats.unshift(chat);
+  localStorage.setItem('bnt_chats', JSON.stringify(chats));
+
+  setTimeout(()=>botSay("🎉 Opening WhatsApp for you! Our team will reply within minutes.\n\nHave a wonderful day! 🧸📚", []), 500);
+}
+
+// Show tooltip after 3s
+setTimeout(() => {
+  const t = document.getElementById('chat-tooltip');
+  t.classList.remove('hidden');
+  tooltipTimer = setTimeout(() => t.classList.add('hidden'), 5000);
+}, 3000);
+</script>
+<!-- PAYMENT MODAL -->
+<div id="pay-modal-overlay" class="pay-overlay">
+  <div class="pay-modal">
+
+    <!-- Header -->
+    <div class="pay-modal-header">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.3rem;">🔒</span>
+        <div>
+          <div style="font-size:1rem;font-weight:800;">Secure Payment</div>
+          <div style="font-size:0.72rem;opacity:0.85;">Book'N'Toys · Safe & Encrypted</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span id="pay-total-header" style="font-size:1.2rem;font-weight:900;"></span>
+        <button onclick="document.getElementById('pay-modal-overlay').classList.remove('open')" class="pay-close">✕</button>
+      </div>
+    </div>
+
+    <div class="pay-modal-body">
+
+      <!-- Order mini summary -->
+      <div class="pay-mini-summary">
+        <div id="pay-items-mini"></div>
+        <div class="pay-summary-row"><span>👤</span><span id="pay-name"></span></div>
+        <div class="pay-summary-row"><span>📞</span><span id="pay-phone"></span></div>
+        <div class="pay-summary-row"><span>📍</span><span id="pay-address" style="font-size:0.78rem;"></span></div>
+      </div>
+
+      <!-- Payment method tabs -->
+      <div class="pay-tabs">
+        <button class="pay-tab active" onclick="switchTab('card',this)">💳 Card</button>
+        <button class="pay-tab" onclick="switchTab('upi',this)">📲 UPI</button>
+        <button class="pay-tab" onclick="switchTab('netbanking',this)">🏦 Net Banking</button>
+      </div>
+
+      <!-- CARD TAB -->
+      <div id="tab-card" class="pay-tab-content active">
+        <div class="pay-field-group">
+          <label>Card Number</label>
+          <input type="text" id="card-number" maxlength="19" placeholder="1234 5678 9012 3456" oninput="formatCard(this)" />
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div class="pay-field-group">
+            <label>Expiry Date</label>
+            <input type="text" id="card-expiry" maxlength="5" placeholder="MM/YY" oninput="formatExpiry(this)" />
+          </div>
+          <div class="pay-field-group">
+            <label>CVV</label>
+            <input type="password" id="card-cvv" maxlength="3" placeholder="•••" />
+          </div>
+        </div>
+        <div class="pay-field-group">
+          <label>Cardholder Name</label>
+          <input type="text" id="card-name" placeholder="Name on card" />
+        </div>
+        <div class="card-brands">
+          <span class="card-brand visa">VISA</span>
+          <span class="card-brand mc">MC</span>
+          <span class="card-brand rupay">RuPay</span>
+          <span class="card-brand amex">AMEX</span>
+        </div>
+      </div>
+
+      <!-- UPI TAB -->
+      <div id="tab-upi" class="pay-tab-content">
+        <div class="pay-field-group">
+          <label>UPI ID</label>
+          <input type="text" id="upi-id" placeholder="yourname@upi" />
+        </div>
+        <p style="font-size:0.78rem;color:#888;margin-bottom:14px;">Enter your UPI ID (e.g. name@okaxis, name@paytm, name@ybl)</p>
+        <div class="upi-apps">
+          <div class="upi-app" onclick="selectUpiApp(this,'@okaxis')">
+            <span>🟣</span><span>PhonePe</span>
+          </div>
+          <div class="upi-app" onclick="selectUpiApp(this,'@paytm')">
+            <span>🔵</span><span>Paytm</span>
+          </div>
+          <div class="upi-app" onclick="selectUpiApp(this,'@ybl')">
+            <span>🟢</span><span>GPay</span>
+          </div>
+          <div class="upi-app" onclick="selectUpiApp(this,'@ibl')">
+            <span>🟠</span><span>BHIM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- NET BANKING TAB -->
+      <div id="tab-netbanking" class="pay-tab-content">
+        <div class="pay-field-group">
+          <label>Select Your Bank</label>
+          <select id="nb-bank">
+            <option value="">-- Choose Bank --</option>
+            <option>State Bank of India (SBI)</option>
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>Axis Bank</option>
+            <option>Kotak Mahindra Bank</option>
+            <option>Punjab National Bank</option>
+            <option>Bank of Baroda</option>
+            <option>Canara Bank</option>
+            <option>Union Bank of India</option>
+            <option>IndusInd Bank</option>
+          </select>
+        </div>
+        <div class="nb-banks-grid">
+          <div class="nb-bank-chip" onclick="selectBank(this,'State Bank of India (SBI)')">🏦 SBI</div>
+          <div class="nb-bank-chip" onclick="selectBank(this,'HDFC Bank')">🏦 HDFC</div>
+          <div class="nb-bank-chip" onclick="selectBank(this,'ICICI Bank')">🏦 ICICI</div>
+          <div class="nb-bank-chip" onclick="selectBank(this,'Axis Bank')">🏦 Axis</div>
+          <div class="nb-bank-chip" onclick="selectBank(this,'Kotak Mahindra Bank')">🏦 Kotak</div>
+          <div class="nb-bank-chip" onclick="selectBank(this,'Punjab National Bank')">🏦 PNB</div>
+        </div>
+      </div>
+
+      <p class="pay-note">🔒 256-bit SSL encrypted. Your payment info is never stored.</p>
+      <button class="pay-confirm-btn" onclick="processPayment()">
+        <span id="pay-btn-text">Pay Now</span>
+      </button>
+      <button class="pay-cancel-btn" onclick="document.getElementById('pay-modal-overlay').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAPTCHA MODAL -->
+<div id="otp-overlay" class="pay-overlay">
+  <div class="otp-modal">
+    <div class="otp-header">
+      <span>🤖 Security Check</span>
+      <button onclick="document.getElementById('otp-overlay').classList.remove('open');" class="pay-close">✕</button>
+    </div>
+    <div class="otp-body">
+      <div class="otp-icon">🔒</div>
+      <h3>Verify You're Human</h3>
+      <p>Type the characters shown in the image below</p>
+
+      <!-- CAPTCHA canvas -->
+      <div class="captcha-box">
+        <canvas id="captcha-canvas" width="240" height="70"></canvas>
+        <button class="captcha-refresh" onclick="generateCaptcha()" title="Refresh">🔄</button>
+      </div>
+
+      <div class="otp-inputs">
+        <input type="text" id="otp-input" maxlength="6" placeholder="Enter characters above"
+          autocomplete="off" onkeydown="if(event.key==='Enter')verifyOTP()" />
+      </div>
+      <div id="otp-error" class="otp-error"></div>
+
+      <button class="pay-confirm-btn" onclick="verifyOTP()" style="margin-top:14px;">✅ Verify & Continue</button>
+      <button class="pay-cancel-btn" onclick="document.getElementById('otp-overlay').classList.remove('open');">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .otp-modal {
+    background:#fff; border-radius:24px; width:92%; max-width:400px;
+    box-shadow:0 24px 70px rgba(0,0,0,0.3);
+    animation:popIn 0.3s cubic-bezier(.34,1.56,.64,1); overflow:hidden;
+  }
+  .otp-header {
+    background:linear-gradient(135deg,#1a1a2e,#16213e);
+    color:#fff; padding:18px 22px;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:1rem; font-weight:800;
+  }
+  .otp-body { padding:24px; text-align:center; }
+  .otp-icon { font-size:2.8rem; margin-bottom:10px; }
+  .otp-body h3 { font-size:1.3rem; font-weight:900; color:#1a1a2e; margin-bottom:6px; }
+  .otp-body p { color:#888; font-size:0.86rem; margin-bottom:16px; }
+  .captcha-box {
+    display:inline-flex; align-items:center; gap:10px;
+    background:#f5f5f5; border-radius:14px; padding:12px 16px;
+    margin-bottom:18px; border:2px solid #eee;
+  }
+  #captcha-canvas {
+    border-radius:8px; display:block;
+    filter:contrast(1.1);
+  }
+  .captcha-refresh {
+    background:#fff; border:2px solid #eee; border-radius:10px;
+    padding:8px 10px; cursor:pointer; font-size:1.1rem;
+    transition:all 0.2s; line-height:1;
+  }
+  .captcha-refresh:hover { background:#fff5f0; border-color:var(--primary); transform:rotate(180deg); }
+  .otp-inputs { margin-bottom:8px; }
+  .otp-inputs input {
+    width:100%; padding:13px; text-align:center; font-size:1.3rem; font-weight:800;
+    letter-spacing:6px; border:2.5px solid #eee; border-radius:14px; outline:none;
+    font-family:'Courier New',monospace; transition:border 0.2s; color:#1a1a2e;
+    text-transform:uppercase;
+  }
+  .otp-inputs input:focus { border-color:var(--primary); }
+  .otp-error { color:#dc2626; font-size:0.82rem; min-height:20px; margin-bottom:4px; }
+</style>
+<div id="success-overlay" class="pay-overlay">
+  <div class="success-card">
+    <div class="success-anim">🎉</div>
+    <h2>Order Confirmed!</h2>
+    <p>Thank you, <strong id="success-customer-name"></strong>! Your order has been placed successfully. 🧸📚</p>
+
+    <!-- Bill Box -->
+    <div class="bill-box">
+      <div class="bill-header">
+        <span>🧾 Your Bill</span>
+        <span class="bill-order-id">Order #BNT-<span id="order-id"></span></span>
+      </div>
+      <div id="success-items-list"></div>
+      <div class="bill-row">
+        <span>🧒 Child Age</span><span id="success-age-display" style="font-weight:600;"></span>
+      </div>
+      <div class="bill-row">
+        <span>📅 Rent Period</span><span id="success-rent" style="font-weight:600;"></span>
+      </div>
+      <div class="bill-total-row">
+        <span>💰 Total Paid</span>
+        <span id="success-total" style="font-size:1.15rem;font-weight:900;color:#ff6b35;"></span>
+      </div>
+    </div>
+
+    <!-- Email display -->
+    <div class="bill-email-info">
+      📧 Bill automatically sent to: <strong id="success-email-display"></strong>
+    </div>
+
+
+
+    <button class="pay-confirm-btn" onclick="closeSuccess()" style="margin-top:10px;background:linear-gradient(135deg,#1a1a2e,#16213e);">
+      🏠 Back to Home
+    </button>
+  </div>
+</div>
+
+
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<style>
+  /* PAYMENT MODAL */
+  .pay-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); z-index: 5000;
+    align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .pay-overlay.open { display: flex; }
+  .pay-modal {
+    background: #fff; border-radius: 24px; width: 100%; max-width: 440px;
+    max-height: 92vh; overflow-y: auto;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.3);
+    animation: popIn 0.3s cubic-bezier(.34,1.56,.64,1);
+  }
+  @keyframes popIn { from{transform:scale(0.85);opacity:0} to{transform:scale(1);opacity:1} }
+  .pay-modal-header {
+    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    color: #fff; padding: 18px 22px;
+    display: flex; justify-content: space-between; align-items: center;
+    position: sticky; top: 0; z-index: 1;
+  }
+  .pay-close {
+    background: rgba(255,255,255,0.15); border: none; color: #fff;
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer;
+    font-size: 0.9rem; font-weight: 700; transition: background 0.2s;
+  }
+  .pay-close:hover { background: rgba(255,255,255,0.3); }
+  .pay-modal-body { padding: 20px; }
+
+  /* Mini summary */
+  .pay-mini-summary {
+    background: #f9f9f9; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px;
+    border: 1.5px solid #f0f0f0;
+  }
+  .pay-summary-row { display:flex; gap:8px; font-size:0.82rem; color:#666; padding:3px 0; }
+
+  /* Tabs */
+  .pay-tabs { display:flex; gap:8px; margin-bottom:18px; }
+  .pay-tab {
+    flex:1; padding:10px 6px; border:2px solid #eee; background:#fff;
+    border-radius:12px; font-size:0.82rem; font-weight:700; cursor:pointer;
+    transition:all 0.2s; color:#888;
+  }
+  .pay-tab.active { border-color:#ff6b35; background:#fff5f0; color:#ff6b35; }
+  .pay-tab-content { display:none; }
+  .pay-tab-content.active { display:block; }
+
+  /* Fields */
+  .pay-field-group { margin-bottom:14px; }
+  .pay-field-group label { display:block; font-size:0.78rem; font-weight:700; color:#555; margin-bottom:6px; }
+  .pay-field-group input, .pay-field-group select {
+    width:100%; padding:11px 14px; border:2px solid #eee; border-radius:12px;
+    font-size:0.92rem; outline:none; font-family:inherit; transition:border 0.2s;
+    background:#fff;
+  }
+  .pay-field-group input:focus, .pay-field-group select:focus { border-color:#ff6b35; }
+
+  /* Card brands */
+  .card-brands { display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap; }
+  .card-brand {
+    padding:5px 12px; border-radius:8px; font-size:0.72rem; font-weight:800;
+    letter-spacing:0.5px;
+  }
+  .visa { background:#1a1f71; color:#fff; }
+  .mc { background:#eb001b; color:#fff; }
+  .rupay { background:#006a4e; color:#fff; }
+  .amex { background:#007bc1; color:#fff; }
+
+  /* UPI apps */
+  .upi-apps { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:14px; }
+  .upi-app {
+    display:flex; flex-direction:column; align-items:center; gap:4px;
+    padding:10px 6px; border:2px solid #eee; border-radius:12px; cursor:pointer;
+    font-size:0.75rem; font-weight:600; transition:all 0.2s;
+  }
+  .upi-app span:first-child { font-size:1.4rem; }
+  .upi-app:hover, .upi-app.selected { border-color:#ff6b35; background:#fff5f0; color:#ff6b35; }
+
+  /* Net banking chips */
+  .nb-banks-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+  .nb-bank-chip {
+    padding:8px 6px; border:2px solid #eee; border-radius:10px; font-size:0.75rem;
+    font-weight:700; text-align:center; cursor:pointer; transition:all 0.2s; color:#555;
+  }
+  .nb-bank-chip:hover, .nb-bank-chip.selected { border-color:#ff6b35; background:#fff5f0; color:#ff6b35; }
+
+  .pay-note { font-size:0.75rem; color:#aaa; text-align:center; margin:12px 0 14px; line-height:1.5; }
+  .pay-confirm-btn {
+    width:100%; padding:14px; background:linear-gradient(135deg,#ff6b35,#f72585);
+    color:#fff; border:none; border-radius:30px; font-weight:800; font-size:1rem;
+    cursor:pointer; margin-bottom:10px; transition:transform 0.2s, box-shadow 0.2s;
+    box-shadow:0 6px 20px rgba(255,107,53,0.4);
+  }
+  .pay-confirm-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 28px rgba(255,107,53,0.5); }
+  .pay-confirm-btn:disabled { opacity:0.7; cursor:not-allowed; }
+  .pay-cancel-btn {
+    width:100%; padding:11px; background:#f5f5f5; color:#888;
+    border:none; border-radius:30px; font-weight:600; font-size:0.9rem; cursor:pointer;
+  }
+
+  /* SUCCESS */
+  .success-card {
+    background: #fff; border-radius: 28px; padding: 32px 28px; text-align: center;
+    width: 92%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    animation: popIn 0.35s cubic-bezier(.34,1.56,.64,1);
+    max-height: 92vh; overflow-y: auto;
+  }
+  .success-anim { font-size: 4rem; margin-bottom: 12px; animation: bounce 0.8s ease infinite alternate; }
+  @keyframes bounce { from{transform:translateY(0)} to{transform:translateY(-12px)} }
+  .success-card h2 { font-size: 1.6rem; font-weight: 900; color: #1a1a2e; margin-bottom: 8px; }
+  .success-card > p { color: #666; font-size: 0.9rem; line-height: 1.6; margin-bottom: 18px; }
+
+  /* Bill Box */
+  .bill-box {
+    background: #fffaf7; border: 1.5px solid #ffd6c0; border-radius: 16px;
+    overflow: hidden; margin-bottom: 14px; text-align: left;
+  }
+  .bill-header {
+    background: linear-gradient(135deg,#ff6b35,#f72585);
+    color: #fff; padding: 12px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 800; font-size: 0.9rem;
+  }
+  .bill-order-id { font-size: 0.75rem; opacity: 0.9; font-weight: 600; }
+  .bill-row {
+    display: flex; justify-content: space-between; padding: 8px 16px;
+    font-size: 0.82rem; color: #555; border-bottom: 1px solid #f5ede8;
+  }
+  .bill-total-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 12px 16px; background: #fff5f0;
+    font-weight: 800; font-size: 0.9rem; color: #1a1a2e;
+  }
+  .bill-email-info {
+    background: #f0fdf4; border: 1.5px dashed #86efac; border-radius: 12px;
+    padding: 10px 14px; font-size: 0.78rem; color: #166534;
+    margin-bottom: 14px; line-height: 1.5;
+  }
+  .send-bill-btn {
+    width: 100%; padding: 14px; margin-bottom: 10px;
+    background: linear-gradient(135deg, #ff6b35, #f72585);
+    color: #fff; border: none; border-radius: 30px;
+    font-weight: 800; font-size: 1rem; cursor: pointer;
+    box-shadow: 0 6px 20px rgba(255,107,53,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .send-bill-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,107,53,0.5); }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: #1a1a2e; color: #fff; padding: 12px 24px; border-radius: 30px;
+    font-size: 0.88rem; font-weight: 600; z-index: 6000; opacity: 0;
+    transition: all 0.3s ease; pointer-events: none; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+
+
+
+<!-- ═══ ADMIN LOGIN MODAL ═══ -->
+<div id="admin-login-overlay" class="pay-overlay">
+  <div style="background:#fff;border-radius:24px;padding:40px 32px;width:90%;max-width:380px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,0.35);animation:popIn 0.3s cubic-bezier(.34,1.56,.64,1);">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🔐</div>
+    <h2 style="font-size:1.4rem;font-weight:900;color:#1a1a2e;margin-bottom:4px;">Admin Access</h2>
+    <p style="color:#aaa;font-size:0.82rem;margin-bottom:22px;">Creators only</p>
+    <div style="position:relative;margin-bottom:14px;text-align:left;">
+      <span style="position:absolute;left:13px;top:13px;">👤</span>
+      <input id="adm-user" type="text" placeholder="Username" style="width:100%;padding:12px 12px 12px 38px;border:2px solid #eee;border-radius:12px;font-size:0.92rem;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#ff6b35'" onblur="this.style.borderColor='#eee'"/>
+    </div>
+    <div style="position:relative;margin-bottom:14px;text-align:left;">
+      <span style="position:absolute;left:13px;top:13px;">🔒</span>
+      <input id="adm-pass" type="password" placeholder="Password" style="width:100%;padding:12px 12px 12px 38px;border:2px solid #eee;border-radius:12px;font-size:0.92rem;outline:none;font-family:inherit;" onfocus="this.style.borderColor='#ff6b35'" onblur="this.style.borderColor='#eee'" onkeydown="if(event.key==='Enter')adminLogin()"/>
+    </div>
+    <div id="adm-err" style="color:#dc2626;font-size:0.8rem;min-height:18px;margin-bottom:8px;"></div>
+    <button onclick="adminLogin()" style="width:100%;padding:13px;background:linear-gradient(135deg,#ff6b35,#f72585);color:#fff;border:none;border-radius:30px;font-weight:800;font-size:0.95rem;cursor:pointer;margin-bottom:10px;">🚀 Login</button>
+    <button onclick="document.getElementById('admin-login-overlay').classList.remove('open')" style="width:100%;padding:11px;background:#f5f5f5;color:#888;border:none;border-radius:30px;font-weight:600;font-size:0.88rem;cursor:pointer;">Cancel</button>
+  </div>
+</div>
+
+<!-- ═══ ADMIN PANEL OVERLAY ═══ -->
+<div id="admin-panel-overlay" style="display:none;position:fixed;inset:0;background:#f0f2f5;z-index:9000;overflow-y:auto;flex-direction:column;">
+
+  <!-- Top Bar -->
+  <div style="background:#1a1a2e;color:#fff;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.3);">
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span style="font-size:1.1rem;font-weight:900;">B'N'T <span style="color:#ff6b35;">Admin Panel</span></span>
+      <span style="background:#ff6b35;color:#fff;padding:3px 10px;border-radius:20px;font-size:0.7rem;font-weight:700;">Creator</span>
+    </div>
+    <button onclick="adminLogout()" style="background:rgba(255,255,255,0.1);border:none;color:#fff;padding:8px 16px;border-radius:20px;cursor:pointer;font-size:0.83rem;font-weight:600;">🚪 Logout</button>
+  </div>
+
+  <div style="padding:24px;max-width:1200px;margin:0 auto;width:100%;">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:24px;">
+      <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;">
+        <span style="font-size:1.8rem;background:#fff5f0;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;">📦</span>
+        <div><strong id="as-total" style="display:block;font-size:1.5rem;font-weight:900;color:#1a1a2e;">0</strong><span style="font-size:0.78rem;color:#aaa;">Total Orders</span></div>
+      </div>
+      <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;">
+        <span style="font-size:1.8rem;background:#f0fdf4;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;">✅</span>
+        <div><strong id="as-confirmed" style="display:block;font-size:1.5rem;font-weight:900;color:#1a1a2e;">0</strong><span style="font-size:0.78rem;color:#aaa;">Confirmed</span></div>
+      </div>
+      <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;">
+        <span style="font-size:1.8rem;background:#eff6ff;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;">💰</span>
+        <div><strong id="as-revenue" style="display:block;font-size:1.5rem;font-weight:900;color:#1a1a2e;">₹0</strong><span style="font-size:0.78rem;color:#aaa;">Revenue</span></div>
+      </div>
+      <div style="background:#fff;border-radius:16px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;">
+        <span style="font-size:1.8rem;background:#faf5ff;width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;">👨‍👩‍👧</span>
+        <div><strong id="as-customers" style="display:block;font-size:1.5rem;font-weight:900;color:#1a1a2e;">0</strong><span style="font-size:0.78rem;color:#aaa;">Customers</span></div>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div style="background:#fff;border-radius:16px;padding:16px 20px;margin-bottom:18px;box-shadow:0 2px 10px rgba(0,0,0,0.06);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+      <strong style="font-size:1rem;color:#1a1a2e;">📋 All Orders</strong>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <input id="adm-search" type="text" placeholder="🔍 Search..." oninput="adminRenderOrders()" style="padding:8px 14px;border:2px solid #eee;border-radius:20px;font-size:0.83rem;outline:none;font-family:inherit;width:180px;" onfocus="this.style.borderColor='#ff6b35'" onblur="this.style.borderColor='#eee'"/>
+        <button onclick="adminExportCSV()" style="padding:8px 16px;background:#06d6a0;color:#fff;border:none;border-radius:20px;font-size:0.8rem;font-weight:700;cursor:pointer;">📥 Export CSV</button>
+        <button onclick="adminClearAll()" style="padding:8px 16px;background:#fee2e2;color:#dc2626;border:none;border-radius:20px;font-size:0.8rem;font-weight:700;cursor:pointer;">🗑️ Clear All</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div style="background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);overflow:hidden;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;min-width:700px;">
+        <thead style="background:#1a1a2e;color:#fff;">
+          <tr>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">#</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Order ID</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Name</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Phone</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Child Age</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Rent Period</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Total</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Date</th>
+            <th style="padding:13px 14px;text-align:left;font-size:0.78rem;font-weight:700;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adm-tbody"></tbody>
+      </table>
+      <div id="adm-empty" style="text-align:center;padding:50px;color:#aaa;display:none;">
+        <div style="font-size:2.5rem;margin-bottom:10px;">📭</div>
+        <strong>No orders yet</strong>
+        <p style="font-size:0.83rem;margin-top:4px;">Orders placed on the website will appear here.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ ORDER DETAIL MODAL (Admin) ═══ -->
+<div id="adm-detail-overlay" class="pay-overlay" style="z-index:9500;">
+  <div style="background:#fff;border-radius:22px;width:90%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:popIn 0.3s cubic-bezier(.34,1.56,.64,1);">
+    <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;border-radius:22px 22px 0 0;">
+      <strong>📦 Order Details</strong>
+      <button onclick="document.getElementById('adm-detail-overlay').classList.remove('open')" style="background:rgba(255,255,255,0.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-weight:700;">✕</button>
+    </div>
+    <div id="adm-detail-body" style="padding:22px;"></div>
+  </div>
+</div>
+
+<script>
+  // ── ADMIN AUTH ──
+  function openAdminLogin() {
+    document.getElementById('adm-user').value='';
+    document.getElementById('adm-pass').value='';
+    document.getElementById('adm-err').textContent='';
+    document.getElementById('admin-login-overlay').classList.add('open');
+  }
+  function adminLogin() {
+    const u = document.getElementById('adm-user').value.trim();
+    const p = document.getElementById('adm-pass').value.trim();
+    if(u==='admin' && p==='creator123@123'){
+      document.getElementById('admin-login-overlay').classList.remove('open');
+      document.getElementById('admin-panel-overlay').style.display='flex';
+      adminLoadOrders();
+    } else {
+      document.getElementById('adm-err').textContent='❌ Incorrect credentials.';
+      setTimeout(()=>document.getElementById('adm-err').textContent='',3000);
+    }
+  }
+  function adminLogout(){
+    document.getElementById('admin-panel-overlay').style.display='none';
+  }
+
+  // ── ADMIN ORDERS ──
+  function adminGetOrders(){ return JSON.parse(localStorage.getItem('bnt_orders')||'[]'); }
+
+  function adminLoadOrders(){
+    adminRenderOrders();
+    adminUpdateStats();
+  }
+
+  function adminUpdateStats(){
+    const orders = adminGetOrders();
+    const revenue = orders.reduce((s,o)=>s+parseInt((o.total||'0').replace(/[₹,]/g,'')),0);
+    const unique = [...new Set(orders.map(o=>o.phone))];
+    document.getElementById('as-total').textContent = orders.length;
+    document.getElementById('as-confirmed').textContent = orders.filter(o=>o.status==='Confirmed').length;
+    document.getElementById('as-revenue').textContent = '₹'+revenue.toLocaleString('en-IN');
+    document.getElementById('as-customers').textContent = unique.length;
+  }
+
+  function adminRenderOrders(){
+    let orders = adminGetOrders();
+    const q = (document.getElementById('adm-search').value||'').toLowerCase();
+    if(q) orders = orders.filter(o=>(o.name||'').toLowerCase().includes(q)||(o.phone||'').includes(q)||(o.orderId||'').toLowerCase().includes(q));
+    const tbody = document.getElementById('adm-tbody');
+    const empty = document.getElementById('adm-empty');
+    if(orders.length===0){ tbody.innerHTML=''; empty.style.display='block'; return; }
+    empty.style.display='none';
+    tbody.innerHTML = orders.map((o,i)=>`
+      <tr style="border-bottom:1px solid #f5f5f5;">
+        <td style="padding:13px 14px;font-size:0.78rem;color:#aaa;">${i+1}</td>
+        <td style="padding:13px 14px;font-weight:800;color:#ff6b35;font-size:0.8rem;">#${o.orderId}</td>
+        <td style="padding:13px 14px;font-weight:700;">${o.name||'—'}</td>
+        <td style="padding:13px 14px;">${o.phone||'—'}</td>
+        <td style="padding:13px 14px;">${o.age||'—'}</td>
+        <td style="padding:13px 14px;">${o.rent||'—'}</td>
+        <td style="padding:13px 14px;font-weight:800;color:#ff6b35;">${o.total||'—'}</td>
+        <td style="padding:13px 14px;font-size:0.75rem;color:#aaa;">${o.date||'—'}</td>
+        <td style="padding:13px 14px;">
+          <button onclick="adminViewOrder('${o.orderId}')" style="padding:5px 11px;background:#eff6ff;color:#1d4ed8;border:none;border-radius:8px;font-size:0.75rem;font-weight:700;cursor:pointer;margin-right:4px;">👁 View</button>
+          <button onclick="adminDeleteOrder('${o.orderId}')" style="padding:5px 11px;background:#fee2e2;color:#dc2626;border:none;border-radius:8px;font-size:0.75rem;font-weight:700;cursor:pointer;">🗑</button>
+        </td>
+      </tr>`).join('');
+  }
+
+  function adminViewOrder(orderId){
+    const o = adminGetOrders().find(x=>x.orderId===orderId);
+    if(!o) return;
+    const row = (label,val)=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #f5f5f5;"><span style="font-size:0.78rem;font-weight:700;color:#888;">${label}</span><span style="font-size:0.88rem;font-weight:600;color:#1a1a2e;text-align:right;max-width:60%;">${val||'—'}</span></div>`;
+    document.getElementById('adm-detail-body').innerHTML =
+      row('Order ID','#'+o.orderId) + row('👤 Name',o.name) + row('📞 Phone',o.phone) +
+      row('✉️ Email',o.email) + row('📍 Address',o.address) + row('🧒 Child Age',o.age) +
+      row('📅 Rent Period',o.rent) + row('📦 Items',o.items) + row('💳 Payment',o.paymentMethod) +
+      row('📆 Date',o.date) +
+      `<div style="background:#fff5f0;border-radius:12px;padding:14px 16px;margin-top:16px;display:flex;justify-content:space-between;font-weight:800;"><span>💰 Total</span><span style="color:#ff6b35;font-size:1.1rem;">${o.total}</span></div>`;
+    document.getElementById('adm-detail-overlay').classList.add('open');
+  }
+
+  function adminDeleteOrder(orderId){
+    if(!confirm('Delete this order?')) return;
+    let orders = adminGetOrders().filter(o=>o.orderId!==orderId);
+    localStorage.setItem('bnt_orders', JSON.stringify(orders));
+    adminLoadOrders();
+  }
+
+  function adminClearAll(){
+    if(!confirm('⚠️ Delete ALL orders? Cannot be undone!')) return;
+    localStorage.removeItem('bnt_orders');
+    adminLoadOrders();
+  }
+
+  function adminExportCSV(){
+    const orders = adminGetOrders();
+    if(!orders.length){ alert('No orders to export.'); return; }
+    const headers=['Order ID','Name','Phone','Email','Address','Child Age','Rent','Items','Total','Payment','Date','Status'];
+    const rows = orders.map(o=>[o.orderId,o.name,o.phone,o.email,o.address,o.age,o.rent,o.items,o.total,o.paymentMethod,o.date,o.status].map(v=>`"${(v||'').replace(/"/g,'""')}"`).join(','));
+    const csv=[headers.join(','),...rows].join('\n');
+    const a=document.createElement('a');
+    a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+    a.download='bnt_orders_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click();
+  }
+
+</script>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner">
+  📱 <span>Install <strong>Book'N'Toys</strong> as an app!</span>
+  <button id="pwa-install-btn">Install</button>
+  <button id="pwa-dismiss">✕</button>
+</div>
+
+<script>
+  // Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js')
+        .then(r => console.log('SW registered'))
+        .catch(e => console.log('SW error', e));
+    });
+  }
+
+  // PWA Install Prompt
+  let deferredPrompt;
+  const banner = document.getElementById('pwa-banner');
+  const installBtn = document.getElementById('pwa-install-btn');
+  const dismissBtn = document.getElementById('pwa-dismiss');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    setTimeout(() => banner.classList.add('show'), 3000);
+  });
+
+  installBtn.addEventListener('click', async () => {
+    banner.classList.remove('show');
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+    }
+  });
+
+  dismissBtn.addEventListener('click', () => banner.classList.remove('show'));
+
+  window.addEventListener('appinstalled', () => {
+    banner.classList.remove('show');
+    showToast('🎉 App installed successfully!');
+  });
+</script>
+
+  // ── END ADMIN ──
+</script>
+
+</body>
+</html>
