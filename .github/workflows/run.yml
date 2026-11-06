@@ -1,0 +1,57 @@
+name: Run website
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "on = publish the real site, off = show offline page"
+        required: true
+        default: "on"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare offline page
+        if: ${{ inputs.mode == 'off' }}
+        run: |
+          mkdir offline_build
+          cat > offline_build/index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Site offline</title>
+          <style>body{font-family:system-ui,sans-serif;background:#E8EDF3;color:#192436;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+          .box{text-align:center;background:#fff;border:1px solid #D4DCE6;border-radius:14px;padding:48px 40px;max-width:380px}
+          h1{font-size:1.4rem;margin:0 0 8px}p{color:#5B6B82;font-size:.95rem;margin:0}</style></head>
+          <body><div class="box"><h1>This site is offline</h1><p>It has not been run yet. Please check back later.</p></div></body></html>
+          EOF
+
+      - name: Choose what to publish
+        id: pick
+        run: |
+          if [ "${{ inputs.mode }}" = "off" ]; then
+            echo "path=offline_build" >> "$GITHUB_OUTPUT"
+          else
+            echo "path=." >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ steps.pick.outputs.path }}
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
